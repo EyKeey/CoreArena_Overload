@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -14,6 +15,10 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         rb.velocity = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical")) * movementSpeed;
+
+
+        var nearbyEnemies = SpatialHashSystem.Instance.GetNearbyEnemies(transform.position, 15f);
+        Debug.Log("Nearby Enemies: " + nearbyEnemies.Count);
     }
     public void UpdateStat(StatType statType, float stat)
     {

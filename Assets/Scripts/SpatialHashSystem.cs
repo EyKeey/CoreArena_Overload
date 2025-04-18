@@ -55,7 +55,7 @@ public class SpatialHashSystem : MonoBehaviour
         if (newCell != enemy.currentCell)
         {
             // Remove enemy from the old cell
-            if (grid.TryGetValue(enemy, currentCell, out var oldList))
+            if (grid.TryGetValue(enemy.currentCell, out var oldList))
                 oldList.Remove(enemy);
 
             // Add enemy to the new cell
