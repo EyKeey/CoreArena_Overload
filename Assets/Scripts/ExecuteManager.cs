@@ -14,7 +14,7 @@ public class ExecuteManager : MonoBehaviour
 {
     public static ExecuteManager Instance;
 
-    public PlayerController playerController;
+    private Player player;
 
     private void Awake()
     {
@@ -28,11 +28,20 @@ public class ExecuteManager : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        player = FindObjectOfType<Player>();
+        if (player == null)
+        {
+            Debug.LogError("Player not found in the scene.");
+        }
+    }
+
     public void ExecuteStat(CodeBlockType blockType ,StatType statType, float stat)
     {
         if(blockType == CodeBlockType.Player)
         {
-            playerController.UpdateStat(statType, stat);
+            player.UpdateStat(statType, stat);
         }
     }
 
