@@ -66,7 +66,7 @@ public class CodeBlock : ScriptableObject
     public GameObject weaponPrefab;
     public StatType statType;
     public float statValue;
-
+    
     public bool isStandalone;
     public List<CodeBlockType> validParentTypes;
 

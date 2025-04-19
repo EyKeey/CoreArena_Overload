@@ -1,16 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-public enum TargetingMode
-{
-    Closest,
-    LowestHP,
-    HighestHP,
-    Random,
-}
+
 
 public class PlayerController : MonoBehaviour
 {
@@ -18,9 +9,9 @@ public class PlayerController : MonoBehaviour
     public float movementSpeed = 5f;
     public float detectionRadius = 10f;
 
-    public TargetingMode targetingMode = TargetingMode.Random; 
 
     private Rigidbody2D rb;
+    private PlayerTargetingSystem targetingSystem;
     private Transform currentTarget;
     private Vector2 randomDirection;
     private float randomTime = 0f;
@@ -28,11 +19,12 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        targetingSystem = GetComponent<PlayerTargetingSystem>();
     }
 
     private void Update()
     {
-        UpdateTarget();
+        currentTarget = targetingSystem.UpdateTarget(detectionRadius);
 
         if (currentTarget != null)
         {
@@ -45,34 +37,7 @@ public class PlayerController : MonoBehaviour
     }
 
 
-    private void UpdateTarget()
-    {
-        List<Enemy> enemiesInRange = SpatialHashSystem.Instance.GetNearbyEnemies(transform.position, detectionRadius);
-        
-        if (enemiesInRange.Count == 0)
-        {
-            currentTarget = null;
-            return;
-        }
-
-        Enemy target = targetingMode switch
-        {
-            TargetingMode.Closest => enemiesInRange.OrderBy(e => Vector2.Distance(transform.position, e.transform.position)).First() ,
-            TargetingMode.LowestHP => enemiesInRange.OrderBy(e => e.health).First(),
-            TargetingMode.HighestHP => enemiesInRange.OrderByDescending(e => e.health).First(),
-            TargetingMode.Random => enemiesInRange[Random.Range(0, enemiesInRange.Count)],
-            _ => null,
-        };
-
-        if (target != null)
-        {
-            currentTarget = target.transform;
-        }
-        else
-        {
-            currentTarget = null;
-        }
-    }
+    
     private void MoveTowards(Vector2 position)
     {
         Vector2 dir  =  (position - (Vector2)transform.position).normalized;
@@ -90,10 +55,22 @@ public class PlayerController : MonoBehaviour
             randomTime = Random.Range(1f, 2f);
         }
 
+        if (randomDirection.x > 0)
+        {
+            transform.localScale = new Vector3(1, 1, 1); // Saða bak
+        }
+        else if (randomDirection.x < 0)
+        {
+            transform.localScale = new Vector3(-1, 1, 1); // Sola bak
+        }
+
+
+
         transform.position += (Vector3)randomDirection.normalized * movementSpeed * Time.deltaTime;
+
     }
 
 
-    
+
 
 }
