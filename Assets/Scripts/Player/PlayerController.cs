@@ -7,8 +7,6 @@ public class PlayerController : MonoBehaviour
 {
     [Header("Player Settings")]
     public float movementSpeed = 5f;
-    public float detectionRadius = 10f;
-
 
     private Rigidbody2D rb;
     private PlayerTargetingSystem targetingSystem;
@@ -24,7 +22,7 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        currentTarget = targetingSystem.UpdateTarget(detectionRadius);
+        currentTarget = targetingSystem.UpdateTarget();
 
         if (currentTarget != null)
         {
@@ -42,6 +40,15 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 dir  =  (position - (Vector2)transform.position).normalized;
         transform.position += (Vector3)dir * movementSpeed * Time.deltaTime;
+
+        if (dir.x > 0)
+        {
+            transform.localScale = new Vector3(1, 1, 1); // Saða bak
+        }
+        else if (dir.x < 0)
+        {
+            transform.localScale = new Vector3(-1, 1, 1); // Sola bak
+        }
     }
 
     private void Wander()

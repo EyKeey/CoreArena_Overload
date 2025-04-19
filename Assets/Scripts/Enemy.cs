@@ -14,6 +14,15 @@ public class Enemy : MonoBehaviour
     private void Update()
     {
         SpatialHashSystem.Instance.UpdateEnemyCell(this);
+
+
+
+
+
+        if(health <= 0)
+        {
+            Destroy(gameObject);
+        }
     }
 
     private void OnDestroy()
