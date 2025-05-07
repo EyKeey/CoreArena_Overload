@@ -1,119 +1,75 @@
+using System;
+using System.Collections;
 using UnityEngine;
-using Random = UnityEngine.Random;
-
-public enum PlayerState
-{
-    Idle,
-    Moving,
-    Attacking,
-}
 
 public class PlayerController : MonoBehaviour
 {
-    [Header("Player Settings")]
-    public float movementSpeed = 5f;
-    public float attackRange = 5f;
-    public float attackTimer = 0f;
-    public float attackDuration = 0.5f;
-    public float attackDamage = 10f;
-    public PlayerState currentState;
-
+    
     private Rigidbody2D rb;
-    private PlayerTargetingSystem targetingSystem;
-    private PlayerAttackController playerAttackController;
-    private Transform currentTarget;
-    private Vector2 randomDirection;
-    private float randomTime = 0f;
+    private PlayerStat playerStat;
+    private bool isDashing = false;
+    private bool canDash = true;
+    private Vector2 dashDir;
+    private Vector2 moveInput;
+
+    public bool IsUntouchable { get; private set; }
+
 
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        targetingSystem = GetComponent<PlayerTargetingSystem>();
-        playerAttackController = GetComponent<PlayerAttackController>();
+        playerStat = GetComponent<PlayerStat>();
     }
 
     private void Update()
     {
-        if(currentState == PlayerState.Attacking)
+        moveInput = InputManager.Instance.moveInput;
+
+        Move();
+    }
+
+    public void Move()
+    {
+        if (isDashing) return;
+        rb.velocity = new Vector2(moveInput.x * playerStat.moveSpeed, moveInput.y * playerStat.moveSpeed);
+    }
+
+    public void TryDash()
+    {
+        if (!canDash || isDashing) return;
+
+        if(moveInput != Vector2.zero)
         {
-            attackTimer -= Time.deltaTime;
-
-            if (attackTimer <= 0f)
-            {
-                currentState = PlayerState.Moving;   
-            }
-            return;
-        }
-
-        currentTarget = targetingSystem.UpdateTarget();
-
-        if (currentTarget != null)
-        {
-            float distanceToTarget = Vector2.Distance(transform.position, currentTarget.position);
-
-            if (distanceToTarget <= attackRange)
-            {
-                playerAttackController.Attack(currentTarget);
-            }
-            else
-            {
-                MoveTowards(currentTarget.position);    
-            }
+            dashDir = moveInput.normalized;
         }
         else
         {
-            Wander();
+            dashDir = Vector2.right;
         }
+
+        StartCoroutine(Dash());
+
     }
 
-
-    
-    private void MoveTowards(Vector2 position)
+    private IEnumerator Dash()
     {
-        currentState = PlayerState.Moving;
+        Debug.Log("Dashing");
+        isDashing = true;
+        canDash = false;
 
-        Vector2 dir  =  (position - (Vector2)transform.position).normalized;
-        transform.position += (Vector3)dir * movementSpeed * Time.deltaTime;
+        IsUntouchable = true;
 
-        if (dir.x > 0)
-        {
-            transform.localScale = new Vector3(1, 1, 1); // Saða bak
-        }
-        else if (dir.x < 0)
-        {
-            transform.localScale = new Vector3(-1, 1, 1); // Sola bak
-        }
+        Vector2 originalVelocity = rb.velocity;
+        rb.velocity = dashDir * playerStat.dashSpeed;
+
+        yield return new WaitForSeconds(playerStat.dashDuration);
+
+        rb.velocity = originalVelocity;
+        IsUntouchable = false;
+        isDashing = false;
+
+        yield return new WaitForSeconds(playerStat.dashCooldown);
+
+        canDash = true;
     }
-
-    private void Wander()
-    {
-        currentState = PlayerState.Moving;
-
-        randomTime -= Time.deltaTime;
-
-        if (randomTime <= 0f)
-        {
-            float angle = Random.Range(0f, 360f);
-            randomDirection = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
-            randomTime = Random.Range(1f, 2f);
-        }
-
-        if (randomDirection.x > 0)
-        {
-            transform.localScale = new Vector3(1, 1, 1); // Saða bak
-        }
-        else if (randomDirection.x < 0)
-        {
-            transform.localScale = new Vector3(-1, 1, 1); // Sola bak
-        }
-
-
-
-        transform.position += (Vector3)randomDirection.normalized * movementSpeed * Time.deltaTime;
-
-    }
-
-
-
-
 }

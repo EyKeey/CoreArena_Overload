@@ -1,38 +1,35 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Player : MonoBehaviour
 {
+    private PlayerStat playerStat;
     private PlayerController playerController;
 
     private void Start()
     {
+        playerStat = GetComponent<PlayerStat>();
         playerController = GetComponent<PlayerController>();
-        if (playerController == null)
-        {
-            Debug.LogError("PlayerController component not found on this GameObject.");
-        }
     }
 
-
-    public void UpdateStat(StatType statType, float stat)
+    public bool TakeDamage(int damage)
     {
-        switch (statType)
+        if (playerController.IsUntouchable) return false;
+
+        playerStat.currentHealth -= damage;
+        if (playerStat.currentHealth <= 0)
         {
-            case StatType.Health:
-                Debug.Log("Updating Health: " + stat);
-                break;
-            case StatType.Damage:
-                Debug.Log("Updating Damage: " + stat);
-                break;
-            case StatType.Speed:
-                playerController.movementSpeed = stat;
-                break;
-            case StatType.Defense:
-                Debug.Log("Updating Defense: " + stat);
-                break;
-            case StatType.Mana:
-                Debug.Log("Updating Mana: " + stat);
-                break;
+            Die();
+            return false;
         }
+        return true;
+    }
+
+    private void Die()
+    {
+        Destroy(gameObject);
+        Debug.Log("Player died");
     }
 }

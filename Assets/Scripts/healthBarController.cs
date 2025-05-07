@@ -12,8 +12,6 @@ public class healthBarController : MonoBehaviour
     {
         // Initialize the health bar with full segments
         InitBar();
-
-        UpdateBar(250, 1000);
     }
 
     public void InitBar()
